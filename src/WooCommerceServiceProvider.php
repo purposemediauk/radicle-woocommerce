@@ -23,11 +23,13 @@ class WooCommerceServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if (defined('WC_ABSPATH')) {
-            $this->app['woocommerce']->loadThemeTemplateHooks();
-            $this->bindSetupAction();
-            $this->bindFilters();
-        }
+        add_action('after_setup_theme', function(){
+            if (defined('WC_ABSPATH')) {
+                $this->app['woocommerce']->loadThemeTemplateHooks();
+                $this->app['woocommerce']->addThemeSupport();
+                $this->bindFilters();
+            }
+        });
 
         $this->publishes([
             __DIR__ . '/../publishes/resources/views' => $this->app->resourcePath('views/woocommerce'),
@@ -47,10 +49,5 @@ class WooCommerceServiceProvider extends ServiceProvider
         add_filter('wc_get_template_part', [$woocommerce, 'template']);
         add_filter('comments_template', [$woocommerce, 'reviewsTemplate'], 11);
         add_filter('wc_get_template', [$woocommerce, 'template'], 1000);
-    }
-
-    public function bindSetupAction()
-    {
-        add_action('after_setup_theme', [$this->app['woocommerce'], 'addThemeSupport']);
     }
 }
